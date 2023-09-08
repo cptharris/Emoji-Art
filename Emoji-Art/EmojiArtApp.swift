@@ -1,5 +1,5 @@
 //
-//  Emoji_ArtApp.swift
+//  EmojiArtApp.swift
 //  Emoji-Art
 //
 //  Created by Captain Harris on 9/7/23.
@@ -13,9 +13,9 @@ typealias Emoji = EmojiArt.Emoji
 struct EmojiArtApp: App {
 	@StateObject var defaultDocument = EmojiArtDocument()
 	
-    var body: some Scene {
-        WindowGroup {
-            EmojiArtDocumentView(document: defaultDocument)
-        }
-    }
+	var body: some Scene {
+		WindowGroup {
+			EmojiArtDocumentView(document: defaultDocument)
+		}
+	}
 }

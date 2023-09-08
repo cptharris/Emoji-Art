@@ -2,13 +2,13 @@
 //  EmojiArtDocument.swift
 //  Emoji-Art
 //
-//  Created by Caleb Harris on 9/7/23.
+//  Created by Captain Harris on 9/7/23.
 //
 
 import SwiftUI
 
 class EmojiArtDocument: ObservableObject {
-	private var emojiArt = EmojiArt()
+	@Published private var emojiArt = EmojiArt()
 	
 	init() {
 		emojiArt.addEmoji("🚴‍♀️", at: .init(x: -200, y: -150), size: 200)
