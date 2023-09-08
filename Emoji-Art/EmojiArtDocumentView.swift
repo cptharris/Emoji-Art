@@ -29,19 +29,54 @@ struct EmojiArtDocumentView: View {
 		GeometryReader { geometry in
 			ZStack {
 				Color.white
-				AsyncImage(url: document.background)
-					.position(Emoji.Position.zero.in(geometry))
-				ForEach(document.emojis) { emoji in
-					Text(emoji.string)
-						.font(emoji.font)
-						.position(emoji.position.in(geometry))
-				}
+				documentContents(in: geometry)
+					.scaleEffect(zoom * gestureZoom)
+					.offset(pan + gesturePan)
 			}
+			.gesture(panGesture.simultaneously(with: zoomGesture))
 			.dropDestination(for: StUrlData.self) { sturldatas, location in
 				return drop(sturldatas, at: location, in: geometry)
 			}
 		}
 	}
+	
+	@State private var zoom: CGFloat = 1
+	@State private var pan: CGOffset = .zero
+	
+	@GestureState private var gestureZoom: CGFloat = 1
+	@GestureState private var gesturePan: CGOffset = .zero
+	
+	private var zoomGesture: some Gesture {
+		MagnificationGesture()
+			.updating($gestureZoom) { value, gestureZoom, _ in
+				gestureZoom = value
+			}
+			.onEnded { value in
+				zoom *= value
+			}
+	}
+	
+	private var panGesture: some Gesture {
+		DragGesture()
+			.updating($gesturePan) { value, gesturePan, _ in
+				gesturePan = value.translation
+			}
+			.onEnded { value in
+				pan += value.translation
+			}
+	}
+	
+	@ViewBuilder private func documentContents(in geometry: GeometryProxy) -> some View {
+		AsyncImage(url: document.background)
+			.position(Emoji.Position.zero.in(geometry))
+		ForEach(document.emojis) { emoji in
+			Text(emoji.string)
+				.font(emoji.font)
+				.position(emoji.position.in(geometry))
+		}
+	}
+	
+	// MARK: - DRAG-N-DROP
 	
 	private func drop(_ sturldatas: [StUrlData], at location: CGPoint, in geometry: GeometryProxy) -> Bool {
 		for sturldata in sturldatas {
@@ -53,7 +88,7 @@ struct EmojiArtDocumentView: View {
 				document.addEmoji(
 					emoji,
 					at: emojiPosition(at: location, in: geometry),
-					size: paletteEmojiSize
+					size: paletteEmojiSize / zoom
 				)
 				return true
 			default:
@@ -66,8 +101,8 @@ struct EmojiArtDocumentView: View {
 	private func emojiPosition(at location: CGPoint, in geometry: GeometryProxy) -> Emoji.Position {
 		let center = geometry.frame(in: .local).center
 		return Emoji.Position(
-			x: Int(location.x - center.x),
-			y: Int(-(location.y - center.y))
+			x: Int((location.x - center.x - pan.width) / zoom),
+			y: Int(-(location.y - center.y - pan.height) / zoom)
 		)
 	}
 }
