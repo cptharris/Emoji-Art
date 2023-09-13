@@ -28,7 +28,6 @@ extension CGOffset {
 }
 
 extension String {
-	
 	/// Removes any duplicate characters, but preserves order.
 	var uniqued: String {
 		reduce(into: "") { sofar, element in

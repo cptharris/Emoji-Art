@@ -10,11 +10,6 @@ import SwiftUI
 class EmojiArtDocument: ObservableObject {
 	@Published private var emojiArt = EmojiArt()
 	
-	init() {
-		emojiArt.addEmoji("🚴‍♀️", at: .init(x: -200, y: -150), size: 200)
-		emojiArt.addEmoji("🔥", at: .init(x: 250, y: 100), size: 80)
-	}
-	
 	var emojis: [Emoji] {
 		emojiArt.emojis
 	}
@@ -31,6 +26,34 @@ class EmojiArtDocument: ObservableObject {
 	
 	func addEmoji(_ emoji: String, at position: Emoji.Position, size: CGFloat) {
 		emojiArt.addEmoji(emoji, at: position, size: Int(size))
+	}
+	
+	func select(_ emoji: Emoji) {
+		emojiArt[emoji].selected.toggle()
+	}
+	
+	func move(_ emoji: Emoji, by offset: CGOffset) {
+		let existingPosition = emojiArt[emoji].position
+		emojiArt[emoji].position = Emoji.Position(
+			x: existingPosition.x + Int(offset.width),
+			y: existingPosition.y - Int(offset.height)
+		)
+	}
+	
+	func move(emojiWithId id: Emoji.ID, by offset: CGOffset) {
+		if let emoji = emojiArt[id] {
+			move(emoji, by: offset)
+		}
+	}
+	
+	func resize(_ emoji: Emoji, by scale: CGFloat) {
+		emojiArt[emoji].size = Int(CGFloat(emojiArt[emoji].size) * scale)
+	}
+	
+	func resize(emojiWithId id: Emoji.ID, by scale: CGFloat) {
+		if let emoji = emojiArt[id] {
+			resize(emoji, by: scale)
+		}
 	}
 }
 

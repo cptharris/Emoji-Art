@@ -19,7 +19,7 @@ struct PaletteChooser: View {
 		.clipped()
     }
 	
-	var chooser: some View {
+	private var chooser: some View {
 		AnimatedActionButton(systemImage: "paintpalette") {
 			store.cursorIndex += 1
 		}
@@ -33,7 +33,7 @@ struct PaletteChooser: View {
 		}
 	}
 	
-	func view(for palette: Palette) -> some View {
+	private func view(for palette: Palette) -> some View {
 		HStack {
 			Text(palette.name)
 			ScrollingEmojis(palette.emojis)

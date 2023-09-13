@@ -9,6 +9,7 @@ import SwiftUI
 
 class PaletteStore: ObservableObject {
 	let name: String
+	
 	@Published var palettes: [Palette] {
 		didSet {
 			if palettes.isEmpty, !oldValue.isEmpty {
@@ -28,7 +29,7 @@ class PaletteStore: ObservableObject {
 	@Published private var _cursorIndex = 0
 	
 	var cursorIndex: Int {
-		get { boundsCheckedPaletteIndex(_cursorIndex)}
+		get { boundsCheckedPaletteIndex(_cursorIndex) }
 		set { _cursorIndex = boundsCheckedPaletteIndex(newValue) }
 	}
 	

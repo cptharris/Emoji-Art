@@ -9,7 +9,7 @@ import SwiftUI
 
 struct EmojiArtDocumentView: View {
 	@ObservedObject var document: EmojiArtDocument
-		
+	
 	private let paletteEmojiSize: CGFloat = 40
 	
 	var body: some View {
@@ -22,6 +22,8 @@ struct EmojiArtDocumentView: View {
 				.scrollIndicators(.hidden)
 		}
 	}
+	
+	// MARK: - DOCUMENT
 	
 	private var documentBody: some View {
 		GeometryReader { geometry in
@@ -37,6 +39,21 @@ struct EmojiArtDocumentView: View {
 			}
 		}
 	}
+	
+	@ViewBuilder private func documentContents(in geometry: GeometryProxy) -> some View {
+		AsyncImage(url: document.background)
+			.position(Emoji.Position.zero.in(geometry))
+		ForEach(document.emojis) { emoji in
+			Text(emoji.string)
+				.font(emoji.font)
+				.position(emoji.position.in(geometry))
+				.onTapGesture {
+					document.select(emoji)
+				}
+		}
+	}
+	
+	// MARK: - GESTURES
 	
 	@State private var zoom: CGFloat = 1
 	@State private var pan: CGOffset = .zero
@@ -62,16 +79,6 @@ struct EmojiArtDocumentView: View {
 			.onEnded { value in
 				pan += value.translation
 			}
-	}
-	
-	@ViewBuilder private func documentContents(in geometry: GeometryProxy) -> some View {
-		AsyncImage(url: document.background)
-			.position(Emoji.Position.zero.in(geometry))
-		ForEach(document.emojis) { emoji in
-			Text(emoji.string)
-				.font(emoji.font)
-				.position(emoji.position.in(geometry))
-		}
 	}
 	
 	// MARK: - DRAG-N-DROP
