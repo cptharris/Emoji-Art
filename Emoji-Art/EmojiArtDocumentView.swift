@@ -30,12 +30,15 @@ struct EmojiArtDocumentView: View {
 			ZStack {
 				Color.white
 				documentContents(in: geometry)
-					.scaleEffect(zoom * gestureZoom)
+					.scaleEffect(zoom * (selectedEmojis.count == 0 ? gestureZoom : 1))
 					.offset(pan + gesturePan)
 			}
 			.gesture(panGesture.simultaneously(with: zoomGesture))
 			.dropDestination(for: StUrlData.self) { sturldatas, location in
 				return drop(sturldatas, at: location, in: geometry)
+			}
+			.onTapGesture {
+				selectedEmojis.clear()
 			}
 		}
 	}
@@ -44,12 +47,41 @@ struct EmojiArtDocumentView: View {
 		AsyncImage(url: document.background)
 			.position(Emoji.Position.zero.in(geometry))
 		ForEach(document.emojis) { emoji in
+			// TODO: cleanup
 			Text(emoji.string)
 				.font(emoji.font)
+				.border(selectedEmojis.contains(item: emoji.id) ? .black : .clear)
+				.scaleEffect(selectedEmojis.contains(item: emoji.id) ? gestureZoom : 1)
+				.offset(selectedEmojis.contains(item: emoji.id) ? gesturePanSelection : .zero)
 				.position(emoji.position.in(geometry))
 				.onTapGesture {
-					document.select(emoji)
+					selectedEmojis.select(item: emoji.id)
 				}
+				.gesture(selectedEmojis.contains(item: emoji.id) ? panGestureSelection : nil)
+		}
+	}
+	
+	// MARK: - SELECTION
+	
+	@State private var selectedEmojis = SelectSet<Emoji.ID>()
+	
+	private struct SelectSet<T: Hashable> {
+		private(set) var store: Set<T> = []
+		mutating func select(item: T) {
+			if !store.contains(item) {
+				store.insert(item)
+			} else {
+				store.remove(item)
+			}
+		}
+		func contains(item: T) -> Bool {
+			store.contains(item)
+		}
+		var count: Int {
+			store.count
+		}
+		mutating func clear() {
+			store.removeAll()
 		}
 	}
 	
@@ -60,6 +92,7 @@ struct EmojiArtDocumentView: View {
 	
 	@GestureState private var gestureZoom: CGFloat = 1
 	@GestureState private var gesturePan: CGOffset = .zero
+	@GestureState private var gesturePanSelection: CGOffset = .zero
 	
 	private var zoomGesture: some Gesture {
 		MagnificationGesture()
@@ -67,7 +100,13 @@ struct EmojiArtDocumentView: View {
 				gestureZoom = value
 			}
 			.onEnded { value in
-				zoom *= value
+				if selectedEmojis.count == 0 {
+					zoom *= value
+				} else {
+					for selectID in selectedEmojis.store {
+						document.resize(emojiWithId: selectID, by: value)
+					}
+				}
 			}
 	}
 	
@@ -78,6 +117,18 @@ struct EmojiArtDocumentView: View {
 			}
 			.onEnded { value in
 				pan += value.translation
+			}
+	}
+	
+	private var panGestureSelection: some Gesture {
+		DragGesture()
+			.updating($gesturePanSelection) { value, gesturePanSelection, _ in
+				gesturePanSelection = value.translation
+			}
+			.onEnded { value in
+				for selectID in selectedEmojis.store {
+					document.move(emojiWithId: selectID, by: value.translation)
+				}
 			}
 	}
 	

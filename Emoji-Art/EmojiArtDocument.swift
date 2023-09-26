@@ -28,10 +28,6 @@ class EmojiArtDocument: ObservableObject {
 		emojiArt.addEmoji(emoji, at: position, size: Int(size))
 	}
 	
-	func select(_ emoji: Emoji) {
-		emojiArt[emoji].selected.toggle()
-	}
-	
 	func move(_ emoji: Emoji, by offset: CGOffset) {
 		let existingPosition = emojiArt[emoji].position
 		emojiArt[emoji].position = Emoji.Position(

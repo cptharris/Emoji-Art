@@ -55,7 +55,6 @@ struct EmojiArt {
 		let string: String
 		var position: Position
 		var size: Int
-		var selected: Bool = false
 		var id: Int
 		
 		struct Position {
