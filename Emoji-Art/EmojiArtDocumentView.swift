@@ -58,6 +58,9 @@ struct EmojiArtDocumentView: View {
 					selectedEmojis.select(item: emoji.id)
 				}
 				.gesture(selectedEmojis.contains(item: emoji.id) ? panGestureSelection : nil)
+				.onLongPressGesture {
+					document.removeEmoji(id: emoji.id)
+				}
 		}
 	}
 	
